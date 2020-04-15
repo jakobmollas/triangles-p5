@@ -4,14 +4,17 @@ class Settings {
   constructor() {
     this.animate = true;
     this.showDiagnostics = false;
-    this.quadTreeSize = 4;
-    this.count = 500;
+    this.quadTreeSize = 8;
+    this.count = 1000;
   }
 }
 
 let particles = [];
+let quadTree = null;
+let frame = 0;
 let gui = null;
 let settings = new Settings();
+let colors = [];
 
 function setup() {
   let canvas = createCanvas(windowWidth, windowHeight);
@@ -19,8 +22,18 @@ function setup() {
 
   textFont('monospace');
 
+  initializeColors();
   initializeParticles();
   initializeGuiControls();
+}
+
+function initializeColors() {
+  colors = [];
+
+  // Pre-calculate colors using arrays (HSB), 
+  // stroke() with dynamic colors are slooow, arrays seems to be much faster
+  for (let i = 15; i <= 45; i += 3)
+    colors.push([i, 100, 100, 50]);
 }
 
 function initializeGuiControls() {
@@ -35,9 +48,8 @@ function initializeGuiControls() {
 function initializeParticles() {
   particles = [];
 
-  for (let i = 0; i < settings.count; i++) {
+  for (let i = 0; i < settings.count; i++)
     particles.push(new Particle(random(windowWidth), random(windowHeight)));
-  }
 }
 
 function windowResized() {
@@ -46,7 +58,7 @@ function windowResized() {
 
 // Main update loop
 function draw() {
-  background(0, 25);
+  background(0, 15);
 
   if (settings.showDiagnostics)
     drawDiagnostics();
@@ -57,10 +69,11 @@ function draw() {
   for (let particle of particles)
     particle.update();
 
-  let quadTree = createQuadTree(particles);
+  colorMode(HSB, 100);
 
+  let quadTree = createQuadTree(particles);
   for (let particle of particles)
-    particle.draw(quadTree);
+    particle.draw(quadTree, colors);
 }
 
 function createQuadTree(particles) {

@@ -11,13 +11,9 @@ class Particle {
         this.wraparoundIfNeeded();
     }
 
-    draw(qtParticles) {
-        push();
-
-        colorMode(HSB, 100);
-
-        let hue =  map(this.velocity.heading(), -1, 1, 25, 35);
-        stroke(hue, 100, 100, 50);
+    draw(qtParticles, colors) {
+        let hue = floor(map(this.velocity.heading(), -PI, PI, 0, 10));
+        stroke(colors[hue]);
 
         let perceptionRadius = 50;
         let matchedPoints = this.getReducedAreaMatch(qtParticles, perceptionRadius, 2);
@@ -27,8 +23,6 @@ class Particle {
             line(matchedPoints[0].userData.position.x, matchedPoints[0].userData.position.y, matchedPoints[1].userData.position.x, matchedPoints[1].userData.position.y);
             line(matchedPoints[1].userData.position.x, matchedPoints[1].userData.position.y, this.position.x, this.position.y);
         }
-
-        pop();
     }
 
     wraparoundIfNeeded() {
@@ -46,8 +40,8 @@ class Particle {
     getReducedAreaMatch(qtParticles, searchRadius, maxCount) {
         let searchArea = new CircleArea(this.position.x, this.position.y, searchRadius);
         let matchedPoints = qtParticles.query(searchArea).filter(n => n.userData !== this);
-        let sortedPoints = matchedPoints.sort((a, b) => p5.Vector.dist(this.position, a.userData.position) - p5.Vector.dist(this.position, b.userData.position));
+        //let sortedPoints = matchedPoints.sort((a, b) => p5.Vector.dist(this.position, a.userData.position) - p5.Vector.dist(this.position, b.userData.position));
         
-        return sortedPoints.slice(0, maxCount);
+        return matchedPoints.slice(0, maxCount);
     }
 }
